@@ -37,6 +37,7 @@
     }
     else {
         sleep(OPERATION_EXECUTION_TIME);
+        self.result = @(YES);
     }
 }
 
@@ -74,6 +75,7 @@
         [self onCancel];
     }
     else {
+        self.result = @(YES);
         self.state = MLOperationStateFinished;
     }
 }
@@ -107,6 +109,7 @@
     }
     else {
         sleep(OPERATION_EXECUTION_TIME);
+        self.result = @(YES);
     }
 }
 
@@ -310,6 +313,59 @@
         XCTAssertEqual(operation.cancellationCounter, 1);
         XCTAssertEqual(operation.executionCounter, 1);
     }
+}
+
+#pragma mark Results Operation Tests
+
+- (void)testOperationCompletionResult {
+    __block id operationResult = nil;
+    XCTestExpectation * expectation = [self expectationWithDescription:nil];
+    MLTestOperation * operation = [[MLTestOperation alloc] init];
+    [operation setCompletionBlockWithSuccess:^(MLOperation *operation, id result) {
+        operationResult = result;
+        [expectation fulfill];
+    } failure:^(MLOperation *operation, NSError *error) {
+        [expectation fulfill];
+    }];
+    NSOperationQueue * queue = [self createSerialOperationQueue];
+    [queue addOperations:@[operation] waitUntilFinished:YES];
+    [self waitForExpectationsWithTimeout:2.0f handler:nil];
+    
+    XCTAssertNotNil(operationResult);
+}
+
+- (void)testAsyncOperationCompletionResult {
+    __block id operationResult = nil;
+    XCTestExpectation * expectation = [self expectationWithDescription:nil];
+    MLTestAsynchronousOperation * operation = [[MLTestAsynchronousOperation alloc] init];
+    [operation setCompletionBlockWithSuccess:^(MLOperation *operation, id result) {
+        operationResult = result;
+        [expectation fulfill];
+    } failure:^(MLOperation *operation, NSError *error) {
+        [expectation fulfill];
+    }];
+    NSOperationQueue * queue = [self createSerialOperationQueue];
+    [queue addOperations:@[operation] waitUntilFinished:YES];
+    [self waitForExpectationsWithTimeout:2.0f handler:nil];
+    
+    XCTAssertNotNil(operationResult);
+}
+
+- (void)testBlockOperationCompletionResult {
+    __block id operationResult = nil;
+    XCTestExpectation * expectation = [self expectationWithDescription:nil];
+    MLTestBlockOperation * operation = [[MLTestBlockOperation alloc] init];
+    [operation setCompletionBlockWithSuccess:^(MLOperation *operation, id result) {
+        operationResult = result;
+        [expectation fulfill];
+    } failure:^(MLOperation *operation, NSError *error) {
+        [expectation fulfill];
+    }];
+    NSOperationQueue * queue = [self createSerialOperationQueue];
+    [queue addOperations:@[operation] waitUntilFinished:YES];
+    [self waitForExpectationsWithTimeout:2.0f handler:nil];
+    
+    XCTAssertNotNil(operationResult);
 }
 
 #pragma mark Private Methods

@@ -214,14 +214,14 @@ static dispatch_group_t MLOperationDispatchGroup() {
         if (strongSelf.error) {
             if (failure) {
                 dispatch_group_async(group, queue, ^{
-                    failure(strongSelf, strongSelf.result);
+                    failure(strongSelf, strongSelf.error);
                 });
             }
         }
         else {
             if (success) {
                 dispatch_group_async(group, queue, ^{
-                    success(strongSelf, strongSelf.error);
+                    success(strongSelf, strongSelf.result);
                 });
             }
         }
